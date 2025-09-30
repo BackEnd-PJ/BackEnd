@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Kakao 지도 시작하기</title>
+    
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=91e7ce40b4650e8a8c4f5fe947b382bb&libraries=services,clusterer,drawing"></script>
+</head>
+<body>
+    <div id="map" style="width:500px; height:400px;"></div>
+
+    <script>
+        var container = document.getElementById('map');
+        var options = {
+            center: new kakao.maps.LatLng(37.564725, 127.028824),
+            level: 3
+        };
+
+        var map = new kakao.maps.Map(container, options);
+
+        
+		var markerPosition  = new kakao.maps.LatLng(37.564725, 127.028824);  // 마커가 표시될 위치 
+		var marker = new kakao.maps.Marker({  // 마커를 생성한다
+		    position: markerPosition
+		});
+
+		marker.setMap(map); // 마커가 지도 위에 표시되도록 설정한다
+
+    </script>
+</body>
+</html>
