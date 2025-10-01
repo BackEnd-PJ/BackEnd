@@ -1,31 +1,184 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <meta charset="utf-8">
-    <title>Kakao 지도 시작하기</title>
-    
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=91e7ce40b4650e8a8c4f5fe947b382bb&libraries=services,clusterer,drawing"></script>
+  <meta charset="UTF-8">
+  <title>카카오 지도 - 커스텀 검색 + 반경</title>
+  <style>
+    html, body {height:100%; margin:0; padding:0;}
+    .container {display:flex; height:100%;}
+
+    /* 왼쪽 사이드바 */
+    .sidebar {
+      width:350px;
+      background:#fff;
+      border-right:1px solid #ddd;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .search_box {
+      padding:10px;
+      border-bottom:1px solid #ddd;
+    }
+    .search_box input {width:220px; padding:5px;}
+    .search_box button {padding:6px 10px; margin-left:5px;}
+
+    #menu_wrap {
+      flex:1;
+      overflow-y:auto;
+      padding:10px;
+    }
+    #placesList li {
+      list-style:none;
+      padding:10px;
+      border-bottom:1px solid #eee;
+      cursor:pointer;
+    }
+    #placesList li:hover {background:#f7f7f7;}
+
+    /* 오른쪽 지도 */
+    #map {flex:1; position:relative;}
+
+    /* 반경 컨트롤 */
+    .radius_control {
+      position:absolute; top:15px; left:15px;
+      z-index:2; background:#fff;
+      border-radius:5px; padding:10px;
+      box-shadow:0 2px 4px rgba(0,0,0,0.2);
+    }
+  </style>
+  <!-- ✅ 카카오 지도 API (본인 appkey로 교체) -->
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=91e7ce40b4650e8a8c4f5fe947b382bb"></script>
 </head>
 <body>
-    <div id="map" style="width:500px; height:400px;"></div>
+<div class="container">
+  <!-- 왼쪽 사이드바 -->
+  <div class="sidebar">
+    <div class="search_box">
+      <input type="text" id="keyword" placeholder="장소 검색">
+      <button onclick="searchPlaces()">검색</button>
+    </div>
+    <div id="menu_wrap">
+      <ul id="placesList"></ul>
+    </div>
+  </div>
 
-    <script>
-        var container = document.getElementById('map');
-        var options = {
-            center: new kakao.maps.LatLng(37.564725, 127.028824),
-            level: 3
+  <!-- 오른쪽 지도 -->
+  <div id="map">
+    <div class="radius_control">
+      <label>반경</label>
+      <input type="range" id="radiusSlider" min="0" max="5000" step="100" value="1000">
+      <span id="radiusValue">1km</span><br>
+      표시된 장소: <span id="markerCount">0</span>개
+    </div>
+  </div>
+</div>
+
+<script>
+  // 📍 내가 지정한 위치 배열
+  const locations = [
+    { name: "스타벅스 왕십리역9번출구점", addr: "서울 성동구 행당동", lat: 37.5612, lng: 127.0375 },
+    { name: "스타벅스 엔터식스점", addr: "서울 성동구 성수동", lat: 37.5618, lng: 127.0339 },
+    { name: "스타벅스 한양대점", addr: "서울 성동구 왕십리로", lat: 37.5553, lng: 127.0436 },
+    { name: "스타벅스 상왕십리역점", addr: "서울 중구 하왕십리", lat: 37.5645, lng: 127.0294 }
+  ];
+
+  let map, circle;
+  let markers = [];
+  const centerPosition = new kakao.maps.LatLng(37.5612, 127.0375);
+
+  // ✅ 지도 초기화
+  function initMap() {
+    const container = document.getElementById('map');
+    const options = { center: centerPosition, level: 5 };
+    map = new kakao.maps.Map(container, options);
+
+    // 반경 원
+    circle = new kakao.maps.Circle({
+      center: centerPosition,
+      radius: 1000,
+      strokeWeight: 2,
+      strokeColor: '#007BFF',
+      strokeOpacity: 0.8,
+      fillColor: '#BEE6FF',
+      fillOpacity: 0.3
+    });
+    circle.setMap(map);
+
+    // 초기 출력
+    renderPlaces(locations);
+  }
+
+  // ✅ 거리 계산 함수
+  function calculateDistance(pos1, pos2) {
+    const lat1 = pos1.getLat(), lon1 = pos1.getLng();
+    const lat2 = pos2.getLat(), lon2 = pos2.getLng();
+    const R = 6371000;
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // ✅ 장소 리스트 + 마커 표시
+  function renderPlaces(list) {
+    // 마커 초기화
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+
+    const listEl = document.getElementById('placesList');
+    listEl.innerHTML = "";
+    const radius = parseInt(document.getElementById('radiusSlider').value, 10);
+    let visibleCount = 0;
+
+    list.forEach(loc => {
+      const pos = new kakao.maps.LatLng(loc.lat, loc.lng);
+      const dist = calculateDistance(centerPosition, pos);
+
+      if (dist <= radius) {
+        // 마커 추가
+        const marker = new kakao.maps.Marker({ position: pos, map: map, title: loc.name });
+        markers.push(marker);
+
+        // 리스트 항목 추가
+        const el = document.createElement('li');
+        el.innerHTML = `
+          <div><b>${loc.name}</b></div>
+          <div style="font-size:12px; color:#555;">${loc.addr}</div>
+          <div style="font-size:12px; color:#007BFF;">거리: ${dist>=1000 ? (dist/1000).toFixed(1)+'km' : Math.round(dist)+'m'}</div>
+        `;
+        el.onclick = () => {
+          map.setCenter(pos);
+          map.setLevel(3);
         };
+        listEl.appendChild(el);
 
-        var map = new kakao.maps.Map(container, options);
+        visibleCount++;
+      }
+    });
 
-        
-		var markerPosition  = new kakao.maps.LatLng(37.564725, 127.028824);  // 마커가 표시될 위치 
-		var marker = new kakao.maps.Marker({  // 마커를 생성한다
-		    position: markerPosition
-		});
+    document.getElementById('markerCount').innerText = visibleCount;
+  }
 
-		marker.setMap(map); // 마커가 지도 위에 표시되도록 설정한다
+  // ✅ 검색 기능 (내 위치 배열만 검색)
+  function searchPlaces() {
+    const keyword = document.getElementById('keyword').value.toLowerCase();
+    const filtered = locations.filter(loc => loc.name.toLowerCase().includes(keyword));
+    renderPlaces(filtered);
+  }
 
-    </script>
+  // ✅ 반경 슬라이더 이벤트
+  document.getElementById('radiusSlider').addEventListener('input', function() {
+    const radius = parseInt(this.value, 10);
+    circle.setRadius(radius);
+    document.getElementById('radiusValue').innerText = radius >= 1000 ? (radius/1000)+'km' : radius+'m';
+    searchPlaces(); // 반경 변경 시 현재 검색결과 반영
+  });
+
+  window.onload = initMap;
+</script>
 </body>
 </html>
