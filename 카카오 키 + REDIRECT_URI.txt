@@ -1,0 +1,3 @@
+카카오 키 : e6f843146e41aaf81175b7973ef2827b
+
+REDIRECT_URI : http://localhost:8080/A/kakao_login.do

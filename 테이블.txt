@@ -1,0 +1,64 @@
+JdbcUtil에서 MySql 비번 자기 걸로 바꾸기
+
+
+
+===============================================================================
+CREATE DATABASE `porjectdb` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
+use porjectdb;
+
+CREATE TABLE `memberTbl` (
+  `memberid` varchar(50) NOT NULL,
+  `password` varchar(60) NOT NULL,
+  `name` varchar(10) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `role` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`memberid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','admin');
+insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','member');
+
+
+CREATE TABLE `productstbl` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,        -- 1. 상품 이름 (e.g., "아이패드 에어 5세대")
+  `price` INT DEFAULT 0,                -- 2. 가격 (e.g., 450000)
+  `addr` VARCHAR(255) DEFAULT NULL,     -- 3. 주소 (무슨 동, e.g., "대방동")
+  `lat` DOUBLE DEFAULT NULL,            -- 4. 위도 (거리 계산의 기준점)
+  `lng` DOUBLE DEFAULT NULL,            -- 5. 경도 (거리 계산의 기준점)
+  `category` VARCHAR(100) DEFAULT NULL, -- 6. 태그 (e.g., "전자기기")
+  `image_url` VARCHAR(255) DEFAULT NULL,  -- 7. 상품 이미지 경로 (e.g., "images/ipad.png")
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- A+ 마켓 상품 데이터 (총 15개) - 성동구 기준
+-- 카테고리: "전자기기", "전공책", "의류/신발", "가구/인테리어"
+--
+
+-- 카테고리: 전자기기 (5개)
+INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url) VALUES
+(NULL, '아이패드 성수동 직거래', 550000, '성수동1가', 37.545, 127.048, '전자기기', 'images/products/ipad_seongsu.jpg'),
+(NULL, '닌텐도 스위치 (왕십리역)', 230000, '행당동', 37.561, 127.037, '전자기기', 'images/products/switch_wangsimni.jpg'),
+(NULL, '로지텍 G Pro 무선 마우스', 70000, '성수동2가', 37.541, 127.056, '전자기기', 'images/products/logitech_gpro.jpg'),
+(NULL, '삼성 32인치 모니터', 190000, '행당동', 37.558, 127.039, '전자기기', 'images/products/samsung_monitor_32.jpg'),
+(NULL, '애플워치 SE 2 (옥수동)', 250000, '옥수동', 37.541, 127.018, '전자기기', 'images/products/apple_watch_se2.jpg');
+
+-- 카테고리: 전공책 (3개)
+INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url) VALUES
+(NULL, '한양대 공대 전공책 5권', 45000, '사근동', 37.558, 127.044, '전공책', 'images/products/hanyang_books.jpg'),
+(NULL, '경영학 교재 (거의 새책)', 20000, '왕십리', 37.562, 127.035, '전공책', 'images/products/biz_books.jpg'),
+(NULL, '토익, 텝스 수험서 일괄', 30000, '금호동', 37.548, 127.025, '전공책', 'images/products/toeic_books.jpg');
+
+-- 카테고리: 의류/신발 (4개)
+INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url) VALUES
+(NULL, '나이키 덩크 로우 (265)', 80000, '성수동', 37.543, 127.051, '의류/신발', 'images/products/nike_dunk.jpg'),
+(NULL, '아더에러 후드티 (Ader Error)', 110000, '성수동', 37.540, 127.058, '의류/신발', 'images/products/ader_hoodie.jpg'),
+(NULL, '젠틀몬스터 선글라스 (성수 쇼룸)', 150000, '성수동1가', 37.546, 127.047, '의류/신발', 'images/products/gentle_monster.jpg'),
+(NULL, '무신사 스탠다드 슬랙스', 15000, '행당동', 37.559, 127.041, '의류/신발', 'images/products/musinsa_slacks.jpg');
+
+-- 카테고리: 가구/인테리어 (3개)
+INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url) VALUES
+(NULL, '이케아 2단 선반 (화이트)', 10000, '마장동', 37.566, 127.041, '가구/인테리어', 'images/products/ikea_shelf.jpg'),
+(NULL, '마켓비 스탠드 조명', 25000, '옥수동', 37.540, 127.020, '가구/인테리어', 'images/products/marketb_lamp.jpg'),
+(NULL, '1인용 암체어 (금호동)', 50000, '금호동', 37.549, 127.023, '가구/인테리어', 'images/products/armchair_geumho.jpg');
