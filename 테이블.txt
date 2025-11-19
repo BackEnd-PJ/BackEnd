@@ -53,6 +53,15 @@ CREATE TABLE `productstbl` (
   REFERENCES `memberTbl` (`memberid`) ON DELETE SET NULL -- 회원이 탈퇴해도 상품은 남김 (NULL로 변경)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 1. 상품의 추가 이미지를 저장할 테이블 생성
+CREATE TABLE product_images (
+    id INT NOT NULL AUTO_INCREMENT,
+    product_id INT NOT NULL,          -- 어떤 상품의 이미지인지 연결
+    image_url VARCHAR(255) NOT NULL,  -- 이미지 경로
+    image_order INT DEFAULT 0,        -- 이미지 순서 (0번이 대표 이미지)
+    PRIMARY KEY (id),
+    FOREIGN KEY (product_id) REFERENCES productstbl(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- A+ 마켓 상품 데이터 (총 15개) - 성동구 기준
 -- 카테고리: "전자기기", "전공책", "의류/신발", "가구/인테리어"
