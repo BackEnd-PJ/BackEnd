@@ -15,24 +15,28 @@ DROP TABLE IF EXISTS `email_verifications`;
 DROP TABLE IF EXISTS `locationstbl`;
 DROP TABLE IF EXISTS `productstbl`;
 DROP TABLE IF EXISTS `memberTbl`;
+DROP TABLE IF EXISTS product_images;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- ==========================================================
 
 
 CREATE TABLE `memberTbl` (
-  `memberid` varchar(50) NOT NULL,
-  `password` varchar(60) NOT NULL,
-  `name` varchar(10) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `role` varchar(20) DEFAULT NULL,
+  `memberid` varchar(50) NOT NULL,      -- 로그인 아이디
+  `password` varchar(60) NOT NULL,      -- 비밀번호
+  `name` varchar(30) NOT NULL,          -- 닉네임 
+  `email` varchar(100) NOT NULL,        -- 대학 이메일
+  `school` varchar(50) DEFAULT NULL,    -- 학교
+  `major` varchar(50) DEFAULT NULL,     -- 학과
+  `student_id` varchar(20) DEFAULT NULL, -- 학번
+  `role` varchar(20) DEFAULT 'user',    -- 역할
   `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`memberid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','admin', 0);
-insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','user', 0);
-insert into memberTbl values('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','user', 0);
+insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1);
+insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','동양미래대', '컴소과', '99999999', 'user', 1);
+insert into memberTbl values('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1);
 
 
 
