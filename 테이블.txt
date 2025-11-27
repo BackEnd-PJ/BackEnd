@@ -35,6 +35,11 @@ CREATE TABLE `memberTbl` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1);
+<<<<<<< HEAD
+=======
+insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','동양미래대', '컴소과', '99999999', 'user', 1);
+insert into memberTbl values('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1);
+>>>>>>> 598eaabfb94a7886d4cc191a21a86857ea4778a5
 
 
 
