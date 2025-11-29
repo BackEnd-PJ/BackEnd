@@ -15,23 +15,32 @@ DROP TABLE IF EXISTS `email_verifications`;
 DROP TABLE IF EXISTS `locationstbl`;
 DROP TABLE IF EXISTS `productstbl`;
 DROP TABLE IF EXISTS `memberTbl`;
+DROP TABLE IF EXISTS product_images;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- ==========================================================
 
 
 CREATE TABLE `memberTbl` (
-  `memberid` varchar(50) NOT NULL,
-  `password` varchar(60) NOT NULL,
-  `name` varchar(10) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `role` varchar(20) DEFAULT NULL,
+  `memberid` varchar(50) NOT NULL,      -- 로그인 아이디
+  `password` varchar(60) NOT NULL,      -- 비밀번호
+  `name` varchar(30) NOT NULL,          -- 닉네임 
+  `email` varchar(100) NOT NULL,        -- 대학 이메일
+  `school` varchar(50) DEFAULT NULL,    -- 학교
+  `major` varchar(50) DEFAULT NULL,     -- 학과
+  `student_id` varchar(20) DEFAULT NULL, -- 학번
+  `role` varchar(20) DEFAULT 'user',    -- 역할
   `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`memberid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','admin', 0);
-insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','user', 0);
+insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1);
+<<<<<<< HEAD
+=======
+insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','동양미래대', '컴소과', '99999999', 'user', 1);
+insert into memberTbl values('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1);
+>>>>>>> 598eaabfb94a7886d4cc191a21a86857ea4778a5
+
 
 
 CREATE TABLE `productstbl` (
@@ -44,9 +53,22 @@ CREATE TABLE `productstbl` (
   `category` VARCHAR(100) DEFAULT NULL, -- 6. 태그 (e.g., "전자기기")
   `image_url` VARCHAR(255) DEFAULT NULL,  -- 7. 상품 이미지 경로 (e.g., "images/ipad.png")
   `description` TEXT DEFAULT NULL,     -- 8. 상품설명(e.g., "한 번 입은 옷 입니다.")
-  PRIMARY KEY (`id`)
+  `member_id` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_product_member` (`member_id`),
+  CONSTRAINT `fk_product_member` FOREIGN KEY (`member_id`) 
+  REFERENCES `memberTbl` (`memberid`) ON DELETE SET NULL -- 회원이 탈퇴해도 상품은 남김 (NULL로 변경)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+ALTER TABLE productstbl ADD COLUMN views INT DEFAULT 0;
+-- 1. 상품의 추가 이미지를 저장할 테이블 생성
+CREATE TABLE product_images (
+    id INT NOT NULL AUTO_INCREMENT,
+    product_id INT NOT NULL,          -- 어떤 상품의 이미지인지 연결
+    image_url VARCHAR(255) NOT NULL,  -- 이미지 경로
+    image_order INT DEFAULT 0,        -- 이미지 순서 (0번이 대표 이미지)
+    PRIMARY KEY (id),
+    FOREIGN KEY (product_id) REFERENCES productstbl(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- A+ 마켓 상품 데이터 (총 15개) - 성동구 기준
 -- 카테고리: "전자기기", "전공책", "의류/신발", "가구/인테리어"
@@ -132,3 +154,155 @@ CREATE TABLE `bookmarkstbl` (
   -- 외래 키 설정 (상품 삭제 시 찜 목록 자동 삭제)
   CONSTRAINT `fk_product_id` FOREIGN KEY (`product_id`) REFERENCES `productstbl` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ==========================================================
+-- 'yeonho2010' 회원의 찜 목록 데이터 6개 추가
+-- ==========================================================
+INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 1); -- 아이패드 성수동 직거래
+INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 2); -- 닌텐도 스위치 (왕십리역)
+INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 3); -- 로지텍 G Pro 무선 마우스
+INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 4); -- 삼성 32인치 모니터
+INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 5); -- 애플워치 SE 2 (옥수동)
+INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 6); -- 한양대 공대 전공책 5권
+
+CREATE TABLE IF NOT EXISTS search_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    keyword VARCHAR(255) NOT NULL,
+    search_date TIMESTAMP DEFAULT NOW()
+);
+
+-- 2. 테스트용 더미 데이터 (결과 확인용)
+INSERT INTO search_logs (keyword) VALUES 
+('아이패드'), ('아이패드'), ('아이패드'), ('아이패드'), ('아이패드'),
+('전공책'), ('전공책'), ('전공책'),
+('에어팟'), ('에어팟'),
+('자취방'), ('기숙사');
+-- ▼▼▼ [수정] INSERT 문에 member_id 컬럼과 값이 추가되었습니다. ▼▼▼
+
+-- 카테고리: 전자기기 (5개)
+INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url, member_id) VALUES
+(NULL, '아이패드 성수동 직거래', 550000, '성수동1가', 37.545, 127.048, '전자기기', 'images/products/ipad_seongsu.jpg', 'yeonho2010'),
+(NULL, '닌텐도 스위치 (왕십리역)', 230000, '행당동', 37.561, 127.037, '전자기기', 'images/products/switch_wangsimni.jpg', 'yeonho2010'),
+(NULL, '로지텍 G Pro 무선 마우스', 70000, '성수동2가', 37.541, 127.056, '전자기기', 'images/products/logitech_gpro.jpg', 'yeonho2010'),
+(NULL, '삼성 32인치 모니터', 190000, '행당동', 37.558, 127.039, '전자기기', 'images/products/samsung_monitor_32.jpg', 'yeonho2010'),
+(NULL, '애플워치 SE 2 (옥수동)', 250000, '옥수동', 37.541, 127.018, '전자기기', 'images/products/apple_watch_se2.jpg', 'yeonho2010');
+
+-- 카테고리: 전공책 (3개)
+INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url, member_id) VALUES
+(NULL, '한양대 공대 전공책 5권', 45000, '사근동', 37.558, 127.044, '전공책', 'images/products/hanyang_books.jpg', 'yeonho2010'),
+(NULL, '경영학 교재 (거의 새책)', 20000, '왕십리', 37.562, 127.035, '전공책', 'images/products/biz_books.jpg', 'yeonho2010'),
+(NULL, '토익, 텝스 수험서 일괄', 30000, '금호동', 37.548, 127.025, '전공책', 'images/products/toeic_books.jpg', 'yeonho2010');
+
+-- (나머지 '의류/신발', '가구/인테리어' INSERT 문에도 , 'yeonho2010'을 마지막에 추가해야 합니다.)
+
+-- ============================================================
+-- [아이패드 더미 데이터 100개 추가]
+-- 작성자: yeonho2010, 카테고리: 전자기기
+-- ============================================================
+
+INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id) VALUES
+-- 1. 아이패드 에어 5세대 (가격대: 60~80만)
+('아이패드 에어5 스페이스그레이 64GB S급', 720000, '역삼동', 37.5005, 127.0364, '전자기기', 'images/products/ipad_seongsu.jpg', '기스 하나 없는 S급입니다.', 'yeonho2010'),
+('아이패드 에어5 블루 64GB 풀박스', 750000, '청담동', 37.5241, 127.0421, '전자기기', 'images/products/ipad_seongsu.jpg', '충전기 포함 풀박스입니다.', 'yeonho2010'),
+('아이패드 에어5 핑크 256GB 미개봉', 980000, '삼성동', 37.5123, 127.0589, '전자기기', 'images/products/ipad_seongsu.jpg', '선물받았는데 안써서 팝니다.', 'yeonho2010'),
+('아이패드 에어5 스타라이트 급처', 680000, '논현동', 37.5111, 127.0312, '전자기기', 'images/products/ipad_seongsu.jpg', '빠르게 쿨거하실 분만.', 'yeonho2010'),
+('아이패드 에어5 퍼플 상태 좋음', 710000, '대치동', 37.4932, 127.0567, '전자기기', 'images/products/ipad_seongsu.jpg', '필름 붙여서 사용했습니다.', 'yeonho2010'),
+('아이패드 에어5 셀룰러 64GB', 820000, '신사동', 37.5236, 127.0235, '전자기기', 'images/products/ipad_seongsu.jpg', '셀룰러 모델입니다.', 'yeonho2010'),
+('아이패드 에어5 스그 단순개봉', 740000, '압구정동', 37.5294, 127.0298, '전자기기', 'images/products/ipad_seongsu.jpg', '확인차 개봉만 했습니다.', 'yeonho2010'),
+('아이패드 에어5 64기가 와이파이', 690000, '도곡동', 37.4876, 127.0472, '전자기기', 'images/products/ipad_seongsu.jpg', '직거래 선호합니다.', 'yeonho2010'),
+('아이패드 에어5 블루 펜슬 포함', 850000, '개포동', 37.4802, 127.0665, '전자기기', 'images/products/ipad_seongsu.jpg', '애플펜슬 2세대 같이 드려요.', 'yeonho2010'),
+('아이패드 에어5 A급 팝니다', 700000, '일원동', 37.4833, 127.0851, '전자기기', 'images/products/ipad_seongsu.jpg', '생활 기스 약간 있습니다.', 'yeonho2010'),
+('아이패드 에어5 급매', 650000, '수서동', 37.4874, 127.1016, '전자기기', 'images/products/ipad_seongsu.jpg', '네고 사절입니다.', 'yeonho2010'),
+('아이패드 에어5 + 매직키보드', 1100000, '잠실동', 37.5122, 127.0843, '전자기기', 'images/products/ipad_seongsu.jpg', '키보드 세트입니다.', 'yeonho2010'),
+('아이패드 에어5 256GB 스그', 950000, '신천동', 37.5195, 127.1012, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 넉넉합니다.', 'yeonho2010'),
+('아이패드 에어5 핑크 찍힘 있음', 620000, '방이동', 37.5131, 127.1234, '전자기기', 'images/products/ipad_seongsu.jpg', '모서리 찍힘 감안해서 싸게 팝니다.', 'yeonho2010'),
+('아이패드 에어5 스타라이트 S급', 730000, '오금동', 37.5054, 127.1356, '전자기기', 'images/products/ipad_seongsu.jpg', '배터리 효율 98%', 'yeonho2010'),
+
+-- 2. 아이패드 프로 11인치/12.9인치 (가격대: 90~150만)
+('아이패드 프로 11인치 4세대 128GB', 1050000, '송파동', 37.5042, 127.1098, '전자기기', 'images/products/ipad_seongsu.jpg', 'M2 칩셋입니다.', 'yeonho2010'),
+('아이패드 프로 12.9 6세대 256GB', 1550000, '석촌동', 37.5032, 127.1034, '전자기기', 'images/products/ipad_seongsu.jpg', '화면 크고 좋습니다.', 'yeonho2010'),
+('아이패드 프로 11 3세대 M1', 850000, '가락동', 37.4951, 127.1231, '전자기기', 'images/products/ipad_seongsu.jpg', '가성비 좋습니다.', 'yeonho2010'),
+('아이패드 프로 12.9 5세대 미니LED', 1150000, '문정동', 37.4843, 127.1222, '전자기기', 'images/products/ipad_seongsu.jpg', '화질 짱입니다.', 'yeonho2010'),
+('아이패드 프로 11 4세대 셀룰러', 1200000, '장지동', 37.4785, 127.1345, '전자기기', 'images/products/ipad_seongsu.jpg', '데이터 함께쓰기 가능.', 'yeonho2010'),
+('아이패드 프로 11 2세대 (구형)', 600000, '풍납동', 37.5332, 127.1154, '전자기기', 'images/products/ipad_seongsu.jpg', '유튜브 머신으로 썼습니다.', 'yeonho2010'),
+('아이패드 프로 12.9 4세대', 750000, '성내동', 37.5311, 127.1298, '전자기기', 'images/products/ipad_seongsu.jpg', '화면 큽니다.', 'yeonho2010'),
+('아이패드 프로 M2 11인치 실버', 1080000, '둔촌동', 37.5278, 127.1456, '전자기기', 'images/products/ipad_seongsu.jpg', '보증 남았습니다.', 'yeonho2010'),
+('아이패드 프로 M1 12.9 1TB', 1600000, '천호동', 37.5421, 127.1254, '전자기기', 'images/products/ipad_seongsu.jpg', '램 16기가 모델.', 'yeonho2010'),
+('아이패드 프로 11 3세대 급처', 820000, '암사동', 37.5532, 127.1276, '전자기기', 'images/products/ipad_seongsu.jpg', '박스 없어서 싸게 팜.', 'yeonho2010'),
+('아이패드 프로 11인치 256기가', 1150000, '명일동', 37.5511, 127.1432, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 넉넉.', 'yeonho2010'),
+('아이패드 프로 12.9 6세대 풀세트', 1800000, '고덕동', 37.5555, 127.1543, '전자기기', 'images/products/ipad_seongsu.jpg', '키보드, 펜슬 다 드림.', 'yeonho2010'),
+('아이패드 프로 11 4세대 스그', 1030000, '상일동', 37.5502, 127.1654, '전자기기', 'images/products/ipad_seongsu.jpg', '상태 최상.', 'yeonho2010'),
+('아이패드 프로 M1 11인치', 870000, '길동', 37.5389, 127.1401, '전자기기', 'images/products/ipad_seongsu.jpg', '전투형 아님.', 'yeonho2010'),
+('아이패드 프로 12.9 5세대 128GB', 1100000, '강일동', 37.5654, 127.1723, '전자기기', 'images/products/ipad_seongsu.jpg', '화질 좋습니다.', 'yeonho2010'),
+
+-- 3. 아이패드 미니 6세대 (가격대: 50~70만)
+('아이패드 미니6 퍼플 64GB', 580000, '서초동', 37.4877, 127.0174, '전자기기', 'images/products/ipad_seongsu.jpg', '한손에 쏙 들어옵니다.', 'yeonho2010'),
+('아이패드 미니6 스타라이트 256GB', 850000, '반포동', 37.5034, 127.0012, '전자기기', 'images/products/ipad_seongsu.jpg', '고용량 모델.', 'yeonho2010'),
+('아이패드 미니6 핑크 S급', 600000, '방배동', 37.4812, 126.9923, '전자기기', 'images/products/ipad_seongsu.jpg', '색상 예뻐요.', 'yeonho2010'),
+('아이패드 미니6 스페이스그레이 64', 570000, '양재동', 37.4821, 127.0345, '전자기기', 'images/products/ipad_seongsu.jpg', '게임용으로 좋습니다.', 'yeonho2010'),
+('아이패드 미니6 셀룰러 64GB', 720000, '우면동', 37.4654, 127.0234, '전자기기', 'images/products/ipad_seongsu.jpg', '네비용으로 썼습니다.', 'yeonho2010'),
+('아이패드 미니6 젤리스크롤 양호', 590000, '원지동', 37.4456, 127.0543, '전자기기', 'images/products/ipad_seongsu.jpg', '뽑기 잘했습니다.', 'yeonho2010'),
+('아이패드 미니6 펜슬포함', 700000, '내곡동', 37.4567, 127.0678, '전자기기', 'images/products/ipad_seongsu.jpg', '펜슬 같이 드려요.', 'yeonho2010'),
+('아이패드 미니6 64기가 급처', 550000, '염곡동', 37.4623, 127.0489, '전자기기', 'images/products/ipad_seongsu.jpg', '싸게 가져가세요.', 'yeonho2010'),
+('아이패드 미니6 퍼플 풀박', 610000, '신원동', 37.4489, 127.0612, '전자기기', 'images/products/ipad_seongsu.jpg', '박스 다 있습니다.', 'yeonho2010'),
+('아이패드 미니6 256GB 셀룰러', 980000, '잠원동', 37.5123, 127.0123, '전자기기', 'images/products/ipad_seongsu.jpg', '끝판왕 옵션.', 'yeonho2010'),
+
+-- 4. 아이패드 9세대 / 10세대 (보급형, 가격대: 30~50만)
+('아이패드 9세대 64GB 스그', 320000, '흑석동', 37.5089, 126.9634, '전자기기', 'images/products/ipad_seongsu.jpg', '가성비 최고.', 'yeonho2010'),
+('아이패드 9세대 실버 64GB', 330000, '노량진동', 37.5134, 126.9456, '전자기기', 'images/products/ipad_seongsu.jpg', '인강용 추천.', 'yeonho2010'),
+('아이패드 9세대 256GB', 500000, '상도동', 37.5023, 126.9489, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 큽니다.', 'yeonho2010'),
+('아이패드 10세대 핑크 64GB', 550000, '본동', 37.5112, 126.9567, '전자기기', 'images/products/ipad_seongsu.jpg', '디자인 예쁩니다.', 'yeonho2010'),
+('아이패드 10세대 블루 64GB', 540000, '대방동', 37.5133, 126.9265, '전자기기', 'images/products/ipad_seongsu.jpg', '새것 같습니다.', 'yeonho2010'),
+('아이패드 10세대 실버 미개봉', 580000, '신대방동', 37.4923, 126.9256, '전자기기', 'images/products/ipad_seongsu.jpg', '미개봉 새상품.', 'yeonho2010'),
+('아이패드 9세대 펜슬 포함', 400000, '동작동', 37.5012, 126.9789, '전자기기', 'images/products/ipad_seongsu.jpg', '짭슬펜슬 드림.', 'yeonho2010'),
+('아이패드 9세대 찍힘 다수', 250000, '사당동', 37.4834, 126.9812, '전자기기', 'images/products/ipad_seongsu.jpg', '막 쓰실 분.', 'yeonho2010'),
+('아이패드 10세대 옐로우', 560000, '여의도동', 37.5211, 126.9243, '전자기기', 'images/products/ipad_seongsu.jpg', '병아리 색상.', 'yeonho2010'),
+('아이패드 9세대 와이파이 64', 310000, '당산동', 37.5321, 126.9023, '전자기기', 'images/products/ipad_seongsu.jpg', '배터리 95%.', 'yeonho2010'),
+
+-- 5. 기타 혼합 및 중복 모델 (가격 분포용)
+('아이패드 에어4 스카이블루 64GB', 500000, '문래동', 37.5189, 126.8956, '전자기기', 'images/products/ipad_seongsu.jpg', '에어4 여전히 현역입니다.', 'yeonho2010'),
+('아이패드 에어4 그린 256GB', 650000, '양평동', 37.5278, 126.8867, '전자기기', 'images/products/ipad_seongsu.jpg', '쌈무그린.', 'yeonho2010'),
+('아이패드 에어3 (구형) 64GB', 250000, '신길동', 37.5056, 126.9123, '전자기기', 'images/products/ipad_seongsu.jpg', '유튜브용.', 'yeonho2010'),
+('아이패드 8세대 32GB', 200000, '대림동', 37.4945, 126.8989, '전자기기', 'images/products/ipad_seongsu.jpg', '싸게 팝니다.', 'yeonho2010'),
+('아이패드 7세대 32GB', 180000, '도림동', 37.5089, 126.9034, '전자기기', 'images/products/ipad_seongsu.jpg', '액정 기스 있음.', 'yeonho2010'),
+('아이패드 프로 10.5 (구형 프로)', 300000, '영등포동', 37.5156, 126.9078, '전자기기', 'images/products/ipad_seongsu.jpg', '화이트스팟 약간 있음.', 'yeonho2010'),
+('아이패드 미니5 64GB', 350000, '신도림동', 37.5089, 126.8823, '전자기기', 'images/products/ipad_seongsu.jpg', '미니5 좋습니다.', 'yeonho2010'),
+('아이패드 에어5 스그 64 단순개봉', 730000, '구로동', 37.4956, 126.8878, '전자기기', 'images/products/ipad_seongsu.jpg', '단순 변심.', 'yeonho2010'),
+('아이패드 프로 11 3세대 128GB', 840000, '가리봉동', 37.4823, 126.8890, '전자기기', 'images/products/ipad_seongsu.jpg', '상태 굿.', 'yeonho2010'),
+('아이패드 9세대 64기가 미개봉', 350000, '고척동', 37.5012, 126.8654, '전자기기', 'images/products/ipad_seongsu.jpg', '선물용으로 샀다가 팝니다.', 'yeonho2010'),
+('아이패드 10세대 256GB 블루', 700000, '개봉동', 37.4945, 126.8543, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 큰거 필요하신 분.', 'yeonho2010'),
+('아이패드 에어5 64GB 퍼플', 715000, '오류동', 37.4934, 126.8432, '전자기기', 'images/products/ipad_seongsu.jpg', '풀박스.', 'yeonho2010'),
+('아이패드 프로 12.9 5세대 256', 1250000, '궁동', 37.5023, 126.8321, '전자기기', 'images/products/ipad_seongsu.jpg', '영상 편집용.', 'yeonho2010'),
+('아이패드 미니6 64GB 핑크', 575000, '온수동', 37.4921, 126.8234, '전자기기', 'images/products/ipad_seongsu.jpg', '예뻐요.', 'yeonho2010'),
+('아이패드 에어4 64GB 로즈골드', 480000, '천왕동', 37.4812, 126.8412, '전자기기', 'images/products/ipad_seongsu.jpg', '색감 깡패.', 'yeonho2010'),
+('아이패드 9세대 64GB 실버', 325000, '항동', 37.4789, 126.8212, '전자기기', 'images/products/ipad_seongsu.jpg', '기본형.', 'yeonho2010'),
+('아이패드 프로 11 1세대', 500000, '신정동', 37.5234, 126.8567, '전자기기', 'images/products/ipad_seongsu.jpg', '아직 쓸만합니다.', 'yeonho2010'),
+('아이패드 에어5 256GB 블루', 940000, '목동', 37.5321, 126.8754, '전자기기', 'images/products/ipad_seongsu.jpg', '고용량 에어.', 'yeonho2010'),
+('아이패드 프로 11 4세대 128', 1020000, '신월동', 37.5212, 126.8345, '전자기기', 'images/products/ipad_seongsu.jpg', '신형 프로.', 'yeonho2010'),
+('아이패드 10세대 64GB 옐로', 530000, '가양동', 37.5612, 126.8543, '전자기기', 'images/products/ipad_seongsu.jpg', '색상 확인하세요.', 'yeonho2010'),
+('아이패드 미니6 64GB 스타라이트', 585000, '염창동', 37.5543, 126.8678, '전자기기', 'images/products/ipad_seongsu.jpg', '깔끔합니다.', 'yeonho2010'),
+('아이패드 에어5 64GB 스그 A급', 690000, '등촌동', 37.5521, 126.8490, '전자기기', 'images/products/ipad_seongsu.jpg', '뒷판 미세 기스.', 'yeonho2010'),
+('아이패드 프로 12.9 6세대 128', 1450000, '화곡동', 37.5412, 126.8456, '전자기기', 'images/products/ipad_seongsu.jpg', '고사양.', 'yeonho2010'),
+('아이패드 9세대 64GB 스그 풀박', 340000, '마곡동', 37.5678, 126.8290, '전자기기', 'images/products/ipad_seongsu.jpg', '풀구성.', 'yeonho2010'),
+('아이패드 에어4 256GB 스카이블루', 630000, '내발산동', 37.5534, 126.8321, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 큼.', 'yeonho2010'),
+('아이패드 10세대 핑크 단순개봉', 570000, '외발산동', 37.5423, 126.8212, '전자기기', 'images/products/ipad_seongsu.jpg', '새거랑 다름없음.', 'yeonho2010'),
+('아이패드 프로 11 2세대 128', 620000, '공항동', 37.5612, 126.8123, '전자기기', 'images/products/ipad_seongsu.jpg', '가성비 프로.', 'yeonho2010'),
+('아이패드 미니6 256GB 퍼플', 830000, '방화동', 37.5712, 126.8145, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 걱정 없음.', 'yeonho2010'),
+('아이패드 에어5 64GB 블루 급처', 670000, '개화동', 37.5812, 126.8012, '전자기기', 'images/products/ipad_seongsu.jpg', '급전 필요.', 'yeonho2010'),
+('아이패드 프로 12.9 3세대 (구형)', 650000, '과해동', 37.5555, 126.7989, '전자기기', 'images/products/ipad_seongsu.jpg', '화면 큰거 싼맛에.', 'yeonho2010'),
+('아이패드 9세대 64GB 상태 쏘쏘', 280000, '오곡동', 37.5444, 126.7878, '전자기기', 'images/products/ipad_seongsu.jpg', '찍힘 있어서 싸게.', 'yeonho2010'),
+('아이패드 에어3 256GB', 320000, '오쇠동', 37.5333, 126.7999, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 큰 에어3.', 'yeonho2010'),
+('아이패드 7세대 128GB', 230000, '망원동', 37.5567, 126.9012, '전자기기', 'images/products/ipad_seongsu.jpg', '인강 머신.', 'yeonho2010'),
+('아이패드 프로 10.5 256GB', 350000, '성산동', 37.5678, 126.9123, '전자기기', 'images/products/ipad_seongsu.jpg', '120hz 지원.', 'yeonho2010'),
+('아이패드 미니5 256GB', 420000, '상암동', 37.5789, 126.8965, '전자기기', 'images/products/ipad_seongsu.jpg', '미니5 고용량.', 'yeonho2010'),
+('아이패드 에어5 64GB 핑크 A급', 705000, '연남동', 37.5634, 126.9234, '전자기기', 'images/products/ipad_seongsu.jpg', '상태 좋습니다.', 'yeonho2010'),
+('아이패드 프로 11 3세대 256', 920000, '서교동', 37.5543, 126.9212, '전자기기', 'images/products/ipad_seongsu.jpg', '홍대 직거래.', 'yeonho2010'),
+('아이패드 9세대 64GB 와이파이', 315000, '동교동', 37.5567, 126.9256, '전자기기', 'images/products/ipad_seongsu.jpg', '박스 있음.', 'yeonho2010'),
+('아이패드 10세대 64GB 실버', 545000, '합정동', 37.5489, 126.9134, '전자기기', 'images/products/ipad_seongsu.jpg', '거의 새거.', 'yeonho2010'),
+('아이패드 에어4 64GB 그린', 490000, '상수동', 37.5478, 126.9223, '전자기기', 'images/products/ipad_seongsu.jpg', '전원 버튼 함몰(지문인식 됨).', 'yeonho2010'),
+('아이패드 프로 12.9 5세대 512GB', 1350000, '창전동', 37.5490, 126.9312, '전자기기', 'images/products/ipad_seongsu.jpg', '용량 깡패.', 'yeonho2010'),
+('아이패드 미니6 64GB 스타라이트 A', 590000, '구수동', 37.5456, 126.9367, '전자기기', 'images/products/ipad_seongsu.jpg', '생활기스 조금.', 'yeonho2010'),
+('아이패드 에어5 64GB 스그 미개봉', 760000, '신수동', 37.5467, 126.9389, '전자기기', 'images/products/ipad_seongsu.jpg', '미개봉입니다.', 'yeonho2010'),
+('아이패드 프로 11 4세대 256', 1120000, '현석동', 37.5432, 126.9401, '전자기기', 'images/products/ipad_seongsu.jpg', 'M2 프로.', 'yeonho2010'),
+('아이패드 9세대 64GB 스그', 310000, '토정동', 37.5412, 126.9423, '전자기기', 'images/products/ipad_seongsu.jpg', '가성비.', 'yeonho2010');
