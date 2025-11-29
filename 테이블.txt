@@ -9,71 +9,144 @@ use porjectdb;
 -- ==========================================================
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS `bookmarkstbl`;
-DROP TABLE IF EXISTS `safe_zones`;
+DROP TABLE IF EXISTS `notifications`;
+DROP TABLE IF EXISTS `reviewTbl`;
 DROP TABLE IF EXISTS `email_verifications`;
-DROP TABLE IF EXISTS `locationstbl`;
+DROP TABLE IF EXISTS `safe_zones`;
+DROP TABLE IF EXISTS `bookmarkstbl`;
+DROP TABLE IF EXISTS `product_images`;
+DROP TABLE IF EXISTS `search_logs`;
 DROP TABLE IF EXISTS `productstbl`;
 DROP TABLE IF EXISTS `memberTbl`;
-DROP TABLE IF EXISTS product_images;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- ==========================================================
+CREATE DATABASE IF NOT EXISTS `porjectdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+USE `porjectdb`;
 
 
+-- (1) 회원 테이블
 CREATE TABLE `memberTbl` (
-  `memberid` varchar(50) NOT NULL,      -- 로그인 아이디
-  `password` varchar(60) NOT NULL,      -- 비밀번호
-  `name` varchar(30) NOT NULL,          -- 닉네임 
-  `email` varchar(100) NOT NULL,        -- 대학 이메일
-  `school` varchar(50) DEFAULT NULL,    -- 학교
-  `major` varchar(50) DEFAULT NULL,     -- 학과
+  `memberid` varchar(50) NOT NULL,       -- 아이디
+  `password` varchar(60) NOT NULL,       -- 비밀번호
+  `name` varchar(30) NOT NULL,           -- 닉네임
+  `email` varchar(100) NOT NULL,         -- 이메일
+  `school` varchar(50) DEFAULT NULL,     -- 학교
+  `major` varchar(50) DEFAULT NULL,      -- 학과
   `student_id` varchar(20) DEFAULT NULL, -- 학번
-  `role` varchar(20) DEFAULT 'user',    -- 역할
-  `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
+  `role` varchar(20) DEFAULT 'user',     -- 권한 (user/admin)
+  `is_verified` TINYINT(1) NOT NULL DEFAULT 0, -- 인증 여부
+  `gpa` DOUBLE DEFAULT 0.0,              -- ⭐️ 학점 (평점)
   PRIMARY KEY (`memberid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-insert into memberTbl values('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1);
-<<<<<<< HEAD
-=======
-insert into memberTbl values('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','동양미래대', '컴소과', '99999999', 'user', 1);
-insert into memberTbl values('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1);
->>>>>>> 598eaabfb94a7886d4cc191a21a86857ea4778a5
-
-
-
+-- (2) 상품 테이블
 CREATE TABLE `productstbl` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,       -- 1. 상품 이름 (e.g., "아이패드 에어 5세대")
-  `price` BIGINT DEFAULT 0,              -- 2. 가격 (e.g., 450000)
-  `addr` VARCHAR(255) DEFAULT NULL,   -- 3. 주소 (무슨 동, e.g., "대방동")
-  `lat` DOUBLE DEFAULT NULL,          -- 4. 위도 (거리 계산의 기준점)
-  `lng` DOUBLE DEFAULT NULL,          -- 5. 경도 (거리 계산의 기준점)
-  `category` VARCHAR(100) DEFAULT NULL, -- 6. 태그 (e.g., "전자기기")
-  `image_url` VARCHAR(255) DEFAULT NULL,  -- 7. 상품 이미지 경로 (e.g., "images/ipad.png")
-  `description` TEXT DEFAULT NULL,     -- 8. 상품설명(e.g., "한 번 입은 옷 입니다.")
-  `member_id` VARCHAR(50) DEFAULT NULL,
+  `name` VARCHAR(255) NOT NULL,          -- 상품명
+  `price` BIGINT DEFAULT 0,              -- 가격
+  `addr` VARCHAR(255) DEFAULT NULL,      -- 주소
+  `lat` DOUBLE DEFAULT NULL,             -- 위도
+  `lng` DOUBLE DEFAULT NULL,             -- 경도
+  `category` VARCHAR(100) DEFAULT NULL,  -- 카테고리
+  `image_url` VARCHAR(255) DEFAULT NULL, -- 대표 이미지
+  `description` TEXT DEFAULT NULL,       -- 설명
+  `member_id` VARCHAR(50) DEFAULT NULL,  -- 판매자 ID
+  `views` INT DEFAULT 0,                 -- 조회수
+  `status` VARCHAR(20) DEFAULT 'SALE',   -- ⭐️ 판매 상태 (SALE, SOLD)
   PRIMARY KEY (`id`),
   KEY `fk_product_member` (`member_id`),
   CONSTRAINT `fk_product_member` FOREIGN KEY (`member_id`) 
-  REFERENCES `memberTbl` (`memberid`) ON DELETE SET NULL -- 회원이 탈퇴해도 상품은 남김 (NULL로 변경)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-ALTER TABLE productstbl ADD COLUMN views INT DEFAULT 0;
--- 1. 상품의 추가 이미지를 저장할 테이블 생성
-CREATE TABLE product_images (
-    id INT NOT NULL AUTO_INCREMENT,
-    product_id INT NOT NULL,          -- 어떤 상품의 이미지인지 연결
-    image_url VARCHAR(255) NOT NULL,  -- 이미지 경로
-    image_order INT DEFAULT 0,        -- 이미지 순서 (0번이 대표 이미지)
-    PRIMARY KEY (id),
-    FOREIGN KEY (product_id) REFERENCES productstbl(id) ON DELETE CASCADE
+  REFERENCES `memberTbl` (`memberid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- A+ 마켓 상품 데이터 (총 15개) - 성동구 기준
+-- (3) 상품 다중 이미지 테이블
+CREATE TABLE `product_images` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `product_id` INT NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `image_order` INT DEFAULT 0,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`product_id`) REFERENCES `productstbl`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- (4) 찜 목록 테이블
+CREATE TABLE `bookmarkstbl` (
+  `bookmark_id` INT NOT NULL AUTO_INCREMENT,
+  `member_id` VARCHAR(50) NOT NULL,
+  `product_id` INT NOT NULL,
+  PRIMARY KEY (`bookmark_id`),
+  UNIQUE KEY `uk_member_product` (`member_id`,`product_id`),  
+  CONSTRAINT `fk_bookmark_member` FOREIGN KEY (`member_id`) REFERENCES `memberTbl` (`memberid`) ON DELETE CASCADE,
+  CONSTRAINT `fk_bookmark_product` FOREIGN KEY (`product_id`) REFERENCES `productstbl` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- (5) 알림 테이블
+CREATE TABLE `notifications` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `receiver_id` VARCHAR(50) NOT NULL, -- 받는 사람
+    `sender_id` VARCHAR(50) NOT NULL,   -- 보낸 사람
+    `product_id` INT NOT NULL,          -- 관련 상품
+    `message` VARCHAR(255) NOT NULL,    -- 내용
+    `is_read` TINYINT(1) DEFAULT 0,     -- 읽음 여부
+    `created_at` TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (`receiver_id`) REFERENCES `memberTbl`(`memberid`) ON DELETE CASCADE,
+    FOREIGN KEY (`sender_id`) REFERENCES `memberTbl`(`memberid`) ON DELETE CASCADE,
+    FOREIGN KEY (`product_id`) REFERENCES `productstbl`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- (6) 후기 테이블
+CREATE TABLE `reviewTbl` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `reviewer_id` VARCHAR(50) NOT NULL, -- 작성자
+    `seller_id` VARCHAR(50) NOT NULL,   -- 판매자 (대상)
+    `product_id` INT NOT NULL,          -- 상품
+    `rating` DOUBLE NOT NULL,           -- 점수 (4.5 만점)
+    `content` TEXT,                     -- 내용
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`reviewer_id`) REFERENCES `memberTbl`(`memberid`),
+    FOREIGN KEY (`seller_id`) REFERENCES `memberTbl`(`memberid`),
+    FOREIGN KEY (`product_id`) REFERENCES `productstbl`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- (7) 기타 테이블들
+CREATE TABLE `email_verifications` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(100) NOT NULL,
+  `code` VARCHAR(10) NOT NULL,
+  `expires_at` TIMESTAMP NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `safe_zones` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `zone_name` VARCHAR(255) NOT NULL,
+  `address` VARCHAR(255) DEFAULT NULL,
+  `latitude` DOUBLE NOT NULL,
+  `longitude` DOUBLE NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `search_logs` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `keyword` VARCHAR(255) NOT NULL,
+    `search_date` TIMESTAMP DEFAULT NOW()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 1. 관리자 
+INSERT INTO memberTbl VALUES('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1, 4.5);
+
+-- 2. 일반 유저 1 
+INSERT INTO memberTbl VALUES('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
+
+-- 3. 일반 유저 2 
+INSERT INTO memberTbl VALUES('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
+-- >>>>>>> 598eaabfb94a7886d4cc191a21a86857ea4778a5
+
+
 -- 카테고리: "전자기기", "전공책", "의류/신발", "가구/인테리어"
---
-
 -- 카테고리: 전자기기 (5개)
 INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url) VALUES
 (NULL, '아이패드 성수동 직거래', 550000, '성수동1가', 37.545, 127.048, '전자기기', 'images/products/ipad_seongsu.jpg'),
@@ -101,61 +174,6 @@ INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url) V
 (NULL, '마켓비 스탠드 조명', 25000, '옥수동', 37.540, 127.020, '가구/인테리어', 'images/products/marketb_lamp.jpg'),
 (NULL, '1인용 암체어 (금호동)', 50000, '금호동', 37.549, 127.023, '가구/인테리어', 'images/products/armchair_geumho.jpg');
 
-
-
-CREATE TABLE `locationstbl` (
-  `id`   int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `addr` varchar(255) DEFAULT NULL,
-  `lat`  double DEFAULT NULL,
-  `lng`  double DEFAULT NULL,
-  `category` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES ('스타벅스 왕십리역9번출구점', '서울 성동구 행당동', 37.5612, 127.0375, '카페');
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES('스타벅스 엔터식스점', '서울 성동구 성수동', 37.5618, 127.0339, '카페');
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES('스타벅스 한양대점', '서울 성동구 왕십리로', 37.5553, 127.0436, '카페');
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES('맛있는 국밥집', '서울 성동구 행당동', 37.5605, 127.0360, '음식점');
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES('인생 칼국수', '서울 성동구 사근동', 37.5580, 127.0425, '음식점');
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES('힙한 팝업 마켓', '서울 성동구 성수동', 37.5625, 127.0320, '팝업스토어');
-INSERT INTO locationstbl (name, addr, lat, lng, category) VALUES('스타벅스 상왕십리역점', '서울 중구 하왕십리', 37.5645, 127.0294, '카페');
-
-
--- 2. 이메일 인증 코드를 저장할 새 테이블 생성
-CREATE TABLE `email_verifications` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `email` VARCHAR(100) NOT NULL,
-  `code` VARCHAR(10) NOT NULL,
-  `expires_at` TIMESTAMP NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `idx_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `safe_zones` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `zone_name` VARCHAR(255) NOT NULL,
-  `address` VARCHAR(255) DEFAULT NULL,
-  `latitude` DOUBLE NOT NULL,
-  `longitude` DOUBLE NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE `bookmarkstbl` (
-  `bookmark_id` INT NOT NULL AUTO_INCREMENT,
-  `member_id` VARCHAR(50) NOT NULL,
-  `product_id` INT NOT NULL,
-  PRIMARY KEY (`bookmark_id`),
-  -- 찜 중복 방지
-  UNIQUE KEY `uk_member_product` (`member_id`,`product_id`),  
-  -- 외래 키 설정 (회원 탈퇴 시 찜 목록 자동 삭제)
-  CONSTRAINT `fk_member_id` FOREIGN KEY (`member_id`) REFERENCES `memberTbl` (`memberid`) ON DELETE CASCADE,
-  -- 외래 키 설정 (상품 삭제 시 찜 목록 자동 삭제)
-  CONSTRAINT `fk_product_id` FOREIGN KEY (`product_id`) REFERENCES `productstbl` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-
 -- ==========================================================
 -- 'yeonho2010' 회원의 찜 목록 데이터 6개 추가
 -- ==========================================================
@@ -165,12 +183,6 @@ INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 3); -- �
 INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 4); -- 삼성 32인치 모니터
 INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 5); -- 애플워치 SE 2 (옥수동)
 INSERT INTO bookmarkstbl (member_id, product_id) VALUES ('yeonho2010', 6); -- 한양대 공대 전공책 5권
-
-CREATE TABLE IF NOT EXISTS search_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    keyword VARCHAR(255) NOT NULL,
-    search_date TIMESTAMP DEFAULT NOW()
-);
 
 -- 2. 테스트용 더미 데이터 (결과 확인용)
 INSERT INTO search_logs (keyword) VALUES 
@@ -194,7 +206,6 @@ INSERT INTO productstbl (id, name, price, addr, lat, lng, category, image_url, m
 (NULL, '경영학 교재 (거의 새책)', 20000, '왕십리', 37.562, 127.035, '전공책', 'images/products/biz_books.jpg', 'yeonho2010'),
 (NULL, '토익, 텝스 수험서 일괄', 30000, '금호동', 37.548, 127.025, '전공책', 'images/products/toeic_books.jpg', 'yeonho2010');
 
--- (나머지 '의류/신발', '가구/인테리어' INSERT 문에도 , 'yeonho2010'을 마지막에 추가해야 합니다.)
 
 -- ============================================================
 -- [아이패드 더미 데이터 100개 추가]
