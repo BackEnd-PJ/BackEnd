@@ -43,17 +43,18 @@ CREATE TABLE `memberTbl` (
 -- (2) 상품 테이블
 CREATE TABLE `productstbl` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,          -- 상품명
-  `price` BIGINT DEFAULT 0,              -- 가격
-  `addr` VARCHAR(255) DEFAULT NULL,      -- 주소
-  `lat` DOUBLE DEFAULT NULL,             -- 위도
-  `lng` DOUBLE DEFAULT NULL,             -- 경도
-  `category` VARCHAR(100) DEFAULT NULL,  -- 카테고리
-  `image_url` VARCHAR(255) DEFAULT NULL, -- 대표 이미지
-  `description` TEXT DEFAULT NULL,       -- 설명
-  `member_id` VARCHAR(50) DEFAULT NULL,  -- 판매자 ID
-  `views` INT DEFAULT 0,                 -- 조회수
-  `status` VARCHAR(20) DEFAULT 'SALE',   -- ⭐️ 판매 상태 (SALE, SOLD)
+  `name` VARCHAR(255) NOT NULL,           -- 상품명
+  `price` BIGINT DEFAULT 0,               -- 가격
+  `addr` VARCHAR(255) DEFAULT NULL,       -- 주소
+  `lat` DOUBLE DEFAULT NULL,              -- 위도
+  `lng` DOUBLE DEFAULT NULL,              -- 경도
+  `category` VARCHAR(100) DEFAULT NULL,   -- 카테고리
+  `image_url` VARCHAR(255) DEFAULT NULL,  -- 대표 이미지
+  `description` TEXT DEFAULT NULL,        -- 설명
+  `member_id` VARCHAR(50) DEFAULT NULL,   -- 판매자 ID
+  `views` INT DEFAULT 0,                  -- 조회수
+  `status` VARCHAR(20) DEFAULT 'SALE',    -- 판매 상태 (SALE, SOLD)
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- ⭐️ [추가됨] 등록 시간
   PRIMARY KEY (`id`),
   KEY `fk_product_member` (`member_id`),
   CONSTRAINT `fk_product_member` FOREIGN KEY (`member_id`) 

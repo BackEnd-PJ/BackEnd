@@ -43,17 +43,18 @@ CREATE TABLE `memberTbl` (
 -- (2) 상품 테이블
 CREATE TABLE `productstbl` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(255) NOT NULL,          -- 상품명
-  `price` BIGINT DEFAULT 0,              -- 가격
-  `addr` VARCHAR(255) DEFAULT NULL,      -- 주소
-  `lat` DOUBLE DEFAULT NULL,             -- 위도
-  `lng` DOUBLE DEFAULT NULL,             -- 경도
-  `category` VARCHAR(100) DEFAULT NULL,  -- 카테고리
-  `image_url` VARCHAR(255) DEFAULT NULL, -- 대표 이미지
-  `description` TEXT DEFAULT NULL,       -- 설명
-  `member_id` VARCHAR(50) DEFAULT NULL,  -- 판매자 ID
-  `views` INT DEFAULT 0,                 -- 조회수
-  `status` VARCHAR(20) DEFAULT 'SALE',   -- ⭐️ 판매 상태 (SALE, SOLD)
+  `name` VARCHAR(255) NOT NULL,           -- 상품명
+  `price` BIGINT DEFAULT 0,               -- 가격
+  `addr` VARCHAR(255) DEFAULT NULL,       -- 주소
+  `lat` DOUBLE DEFAULT NULL,              -- 위도
+  `lng` DOUBLE DEFAULT NULL,              -- 경도
+  `category` VARCHAR(100) DEFAULT NULL,   -- 카테고리
+  `image_url` VARCHAR(255) DEFAULT NULL,  -- 대표 이미지
+  `description` TEXT DEFAULT NULL,        -- 설명
+  `member_id` VARCHAR(50) DEFAULT NULL,   -- 판매자 ID
+  `views` INT DEFAULT 0,                  -- 조회수
+  `status` VARCHAR(20) DEFAULT 'SALE',    -- 판매 상태 (SALE, SOLD)
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- ⭐️ [추가됨] 등록 시간
   PRIMARY KEY (`id`),
   KEY `fk_product_member` (`member_id`),
   CONSTRAINT `fk_product_member` FOREIGN KEY (`member_id`) 
@@ -139,7 +140,7 @@ CREATE TABLE `search_logs` (
 INSERT INTO memberTbl VALUES('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1, 4.5);
 
 -- 2. 일반 유저 1 
-INSERT INTO memberTbl VALUES('yeonho2010','dldusgh2010!','맴버','yeonho2003@naver.com','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
+INSERT INTO memberTbl VALUES('yeonho2010','1234','맴버','yeonho2010@m365.dongyang.ac.kr','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
 
 -- 3. 일반 유저 2 
 INSERT INTO memberTbl VALUES('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
@@ -316,4 +317,5 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 ('아이패드 미니6 64GB 스타라이트 A', 590000, '구수동', 37.5456, 126.9367, '전자기기', 'images/products/ipad_seongsu.jpg', '생활기스 조금.', 'yeonho2010'),
 ('아이패드 에어5 64GB 스그 미개봉', 760000, '신수동', 37.5467, 126.9389, '전자기기', 'images/products/ipad_seongsu.jpg', '미개봉입니다.', 'yeonho2010'),
 ('아이패드 프로 11 4세대 256', 1120000, '현석동', 37.5432, 126.9401, '전자기기', 'images/products/ipad_seongsu.jpg', 'M2 프로.', 'yeonho2010'),
-('아이패드 9세대 64GB 스그', 310000, '토정동', 37.5412, 126.9423, '전자기기', 'images/products/ipad_seongsu.jpg', '가성비.', 'yeonho2010');
+('아이패드 9세대 64GB 스그', 310000, '토정동', 37.5412, 126.9423, '전자기기', 'images/products/ipad_seongsu.jpg', '가성비.', 'dongyang');
+
