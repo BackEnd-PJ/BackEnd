@@ -105,9 +105,9 @@ CREATE TABLE `reviewTbl` (
     `rating` DOUBLE NOT NULL,           -- 점수 (4.5 만점)
     `content` TEXT,                     -- 내용
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (`reviewer_id`) REFERENCES `memberTbl`(`memberid`),
-    FOREIGN KEY (`seller_id`) REFERENCES `memberTbl`(`memberid`),
-    FOREIGN KEY (`product_id`) REFERENCES `productstbl`(`id`)
+    FOREIGN KEY (`reviewer_id`) REFERENCES `memberTbl`(`memberid`) ON DELETE CASCADE,
+    FOREIGN KEY (`seller_id`) REFERENCES `memberTbl`(`memberid`) ON DELETE CASCADE,
+    FOREIGN KEY (`product_id`) REFERENCES `productstbl`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- (7) 기타 테이블들
@@ -145,7 +145,7 @@ INSERT INTO memberTbl VALUES('yeonho2010','1234','맴버','yeonho2010@m365.dongy
 -- 3. 일반 유저 2 
 INSERT INTO memberTbl VALUES('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
 -- >>>>>>> 598eaabfb94a7886d4cc191a21a86857ea4778a5
-
+INSERT INTO memberTbl VALUES('dd','zxcasdqwe','하하','bjh00207@dongyang.ac.kr','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
 
 -- 카테고리: "전자기기", "전공책", "의류/신발", "가구/인테리어"
 -- 카테고리: 전자기기 (5개)
