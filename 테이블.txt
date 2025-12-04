@@ -1,5 +1,5 @@
 -- ==========================================================
--- [설정] JDBC 연결 정보와 일치하는지 확인하세요 (porjectdb vs projectdb)
+-- [설정] 데이터베이스 생성 및 사용 (porjectdb)
 -- ==========================================================
 CREATE DATABASE IF NOT EXISTS `porjectdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 USE `porjectdb`;
@@ -142,6 +142,7 @@ CREATE TABLE `search_logs` (
 INSERT INTO memberTbl VALUES('dongyang','dongyang','총괄관리자','dongyang@naver.com','동양미래대', '컴소과', '99999999', 'admin', 1, 4.5);
 INSERT INTO memberTbl VALUES('yeonho2010','1234','맴버','yeonho2010@m365.dongyang.ac.kr','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
 INSERT INTO memberTbl VALUES('beitetv','dldusgh2010!','맴버','beitetv@gmail.com','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
+INSERT INTO memberTbl VALUES('dd','zxcasdqwe','하하','bjh00207@dongyang.ac.kr','동양미래대', '컴소과', '99999999', 'user', 1, 0.0);
 
 
 -- ==========================================================
@@ -304,10 +305,10 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 
 
 -- ==========================================================
--- [4. 데이터 삽입 - 상품 (파일 리스트 90개 완벽 반영)]
+-- [데이터 삽입 5] 상품 (파일 리스트 90개 완벽 반영)
 -- ==========================================================
 
--- (1) 가구/인테리어 (10개)
+-- (1) 가구/인테리어
 INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id, views, status, created_at) VALUES
 ('1인용 리클라이너 소파', 80000, '고척동', 37.4985, 126.8630, '가구/인테리어', 'img/products/가구,인테리어/1인용 리클라이너 소파.jpg', '편안한 휴식을 위한 1인용 소파입니다.', 'yeonho2010', 15, 'SALE', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
 ('단스탠드 무드등', 15000, '구로동', 37.4965, 126.8830, '가구/인테리어', 'img/products/가구,인테리어/단스탠드 무드등.PNG', '감성적인 분위기 연출에 좋습니다.', 'dongyang', 8, 'SALE', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
@@ -320,7 +321,7 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 ('전신 거울 (화이트 프레임)', 15000, '궁동', 37.5015, 126.8330, '가구/인테리어', 'img/products/가구,인테리어/전신 거울 (화이트 프레임).PNG', '자취방 필수템입니다.', 'yeonho2010', 7, 'SALE', DATE_SUB(NOW(), INTERVAL 5 DAY)),
 ('접이식 매트리스 (싱글)', 40000, '목동', 37.5310, 126.8720, '가구/인테리어', 'img/products/가구,인테리어/접이식 매트리스 (싱글).jpg', '손님용으로 몇 번 안 썼습니다.', 'dongyang', 25, 'SALE', DATE_SUB(NOW(), INTERVAL 1 WEEK));
 
--- (2) 뷰티/미용 (11개)
+-- (2) 뷰티/미용
 INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id, views, status, created_at) VALUES
 ('다이슨 에어랩 컴플리트 롱', 550000, '고척동', 37.4990, 126.8650, '뷰티/미용', 'img/products/뷰티,미용/다이슨 에어랩 컴플리트 롱.jpg', '풀박스 구성입니다.', 'yeonho2010', 50, 'SALE', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
 ('다이슨 에어랩 컴플리트 롱 (2)', 540000, '고척동', 37.4990, 126.8650, '뷰티/미용', 'img/products/뷰티,미용/다이슨 에어랩 컴플리트 롱2.jpg', '거의 새것입니다.', 'yeonho2010', 30, 'SALE', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
@@ -334,7 +335,7 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 ('조말론 디퓨저 (잉글리쉬 페어)', 95000, '목동', 37.5300, 126.8700, '뷰티/미용', 'img/products/뷰티,미용/조말론 디퓨저 (잉글리쉬 페어).PNG', '집들이 선물로 최고.', 'yeonho2010', 25, 'SALE', DATE_SUB(NOW(), INTERVAL 6 DAY)),
 ('필립스 전기면도기 9000', 160000, '신정동', 37.5200, 126.8600, '뷰티/미용', 'img/products/뷰티,미용/필립스 전기면도기 9000.PNG', '세척기 포함 풀세트.', 'yeonho2010', 14, 'SALE', DATE_SUB(NOW(), INTERVAL 1 WEEK));
 
--- (3) 생활용품 (14개)
+-- (3) 생활용품
 INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id, views, status, created_at) VALUES
 ('3단 빨래 건조대', 15000, '오류동', 37.4910, 126.8420, '생활용품', 'img/products/생활용품/3단 빨래 건조대.PNG', '튼튼해서 이불도 널 수 있어요.', 'yeonho2010', 8, 'SALE', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
 ('3단 빨래 건조대 (사용감 있음)', 10000, '오류동', 37.4910, 126.8420, '생활용품', 'img/products/생활용품/3단 빨래 건조대_2.PNG', '저렴하게 가져가세요.', 'yeonho2010', 5, 'SALE', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
@@ -351,7 +352,7 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 ('암막 커튼 그레이 (2장)', 30000, '궁동', 37.5030, 126.8310, '생활용품', 'img/products/생활용품/암막 커튼 그레이 (2장).PNG', '빛 차단 확실합니다.', 'yeonho2010', 11, 'SOLD', DATE_SUB(NOW(), INTERVAL 6 DAY)),
 ('코스트코 커클랜드 휴지 30롤', 22000, '수궁동', 37.5010, 126.8360, '생활용품', 'img/products/생활용품/코스트코 커클랜드 휴지 30롤.PNG', '가성비 최고.', 'dongyang', 9, 'SALE', DATE_SUB(NOW(), INTERVAL 1 WEEK));
 
--- (4) 의류/신발 (15개)
+-- (4) 의류/신발
 INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id, views, status, created_at) VALUES
 ('나이키 530', 85000, '신정동', 37.5220, 126.8580, '의류/신발', 'img/products/의류,신발/나이키 530.PNG', '발이 편해요. 240 사이즈.', 'yeonho2010', 25, 'SALE', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
 ('나이키 덩크 로우 범고래 270', 120000, '목동', 37.5300, 126.8700, '의류/신발', 'img/products/의류,신발/나이키 덩크 로우 범고래 270.jpg', '국민 신발, 상태 좋습니다.', 'yeonho2010', 45, 'SALE', DATE_SUB(NOW(), INTERVAL 3 HOUR)),
@@ -369,7 +370,7 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 ('컨버스 척테일러 1970s 블랙', 55000, '궁동', 37.5015, 126.8330, '의류/신발', 'img/products/의류,신발/컨버스 척테일러 1970s 블랙.PNG', '어디에나 잘 어울려요.', 'yeonho2010', 35, 'SOLD', DATE_SUB(NOW(), INTERVAL 1 WEEK)),
 ('컨버스 척테일러 1970s 블랙 (260)', 50000, '궁동', 37.5015, 126.8330, '의류/신발', 'img/products/의류,신발/컨버스 척테일러 1970s 블랙2.PNG', '사용감 조금 있습니다.', 'yeonho2010', 20, 'SALE', DATE_SUB(NOW(), INTERVAL 1 WEEK));
 
--- (5) 전공책 (12개)
+-- (5) 전공책
 INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id, views, status, created_at) VALUES
 ('C언어 본색', 15000, '고척동', 37.4992, 126.8640, '전공책', 'img/products/전공책/C언어본색.jpg', '프로그래밍 기초.', 'yeonho2010', 5, 'SALE', DATE_SUB(NOW(), INTERVAL 30 MINUTE)),
 ('데이터베이스 개론', 18000, '신도림동', 37.5085, 126.8915, '전공책', 'img/products/전공책/데이터베이스개론.PNG', '밑줄 필기 조금 있음.', 'dongyang', 12, 'SALE', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
@@ -384,7 +385,7 @@ INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, descr
 ('토익 기출문제집', 12000, '신정동', 37.5210, 126.8590, '전공책', 'img/products/전공책/토익기출.webp', '앞부분만 조금 풀었어요.', 'yeonho2010', 15, 'SALE', DATE_SUB(NOW(), INTERVAL 6 DAY)),
 ('파이썬 딥러닝', 25000, '화곡동', 37.5405, 126.8445, '전공책', 'img/products/전공책/파이썬 딥러닝.jpg', 'AI 공부하실 분.', 'dongyang', 22, 'SALE', DATE_SUB(NOW(), INTERVAL 1 WEEK));
 
--- (6) 전자기기 (28개)
+-- (6) 전자기기
 INSERT INTO productstbl (name, price, addr, lat, lng, category, image_url, description, member_id, views, status, created_at) VALUES
 ('갤럭시 S23 울트라 크림', 950000, '고척동', 37.4980, 126.8620, '전자기기', 'img/products/전자기기/갤럭시 S23 울트라 크림.jpg', '카메라 성능 최고입니다. 기스 없음.', 'yeonho2010', 55, 'SALE', DATE_SUB(NOW(), INTERVAL 1 HOUR)),
 ('갤럭시 S23', 750000, '구로동', 37.4955, 126.8870, '전자기기', 'img/products/전자기기/갤럭시 S23.PNG', '한 손에 들어오는 사이즈.', 'yeonho2010', 30, 'SALE', DATE_SUB(NOW(), INTERVAL 2 HOUR)),
